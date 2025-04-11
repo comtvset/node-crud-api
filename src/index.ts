@@ -1,5 +1,3 @@
-const firstRun = () => {
-  console.log('run');
-};
+import { createServer } from './server/server';
 
-firstRun();
+createServer();
