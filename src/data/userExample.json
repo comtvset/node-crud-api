@@ -1,0 +1,42 @@
+[
+  {
+    "id": "4e914a81-c1cf-4e99-8727-f2c229bc9b21",
+    "username": "David",
+    "age": 20,
+    "hobbies": [
+      "snowboarding",
+      "cycling",
+      "making music"
+    ]
+  },
+  {
+    "id": "845b85ab-5baa-4c1d-afdb-ca83a2d664b5",
+    "username": "Alex",
+    "age": 30,
+    "hobbies": [
+      "hiking",
+      "drawing",
+      "kayaking"
+    ]
+  },
+  {
+    "id": "fc241b88-1ece-46d5-bc8d-35211d9a0495",
+    "username": "Sarah",
+    "age": 40,
+    "hobbies": [
+      "skiing",
+      "running",
+      "surfing"
+    ]
+  },
+  {
+    "id": "f02aa64f-17f7-43f0-ba1e-ddbe7ec6d7af",
+    "username": "Barbara",
+    "age": 50,
+    "hobbies": [
+      "rock climbing",
+      "motor sports",
+      "mountain biking"
+    ]
+  }
+]

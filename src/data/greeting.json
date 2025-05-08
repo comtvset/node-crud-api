@@ -1,0 +1,30 @@
+{
+  "message": "Welcome to CRUD API",
+  "availableEndpoints": [
+    {
+      "path": "/api/users",
+      "method": "GET",
+      "description": "Get list of all users"
+    },
+    {
+      "path": "/api/users",
+      "method": "POST",
+      "description": "Create new user"
+    },
+    {
+      "path": "/api/users/id",
+      "method": "GET",
+      "description": "Get user by ID"
+    },
+    {
+      "path": "/api/users/id",
+      "method": "PUT",
+      "description": "Update user data by ID"
+    },
+    {
+      "path": "/api/users/id",
+      "method": "DELETE",
+      "description": "Delete user by ID"
+    }
+  ]
+}
