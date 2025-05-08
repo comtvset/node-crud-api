@@ -4,6 +4,8 @@ import { CYAN, RESET_COLOR, YELLOW } from '../constants';
 import { methodGet } from '../services/methodGet';
 import { methodPost } from '../services/methodPost';
 import { methodPut } from '../services/methodPut';
+import { methodDelete } from '../services/methodDelete';
+import { methodNotAllowed405 } from '../services/responses';
 
 export const createServer = () => {
   const port = process.env.PORT || 4000;
@@ -11,14 +13,19 @@ export const createServer = () => {
   const server = http.createServer((req, res) => {
     try {
       if (req.method === 'GET') {
-        methodGet(req, res);
+        return methodGet(req, res);
       }
       if (req.method === 'POST') {
-        methodPost(req, res);
+        return methodPost(req, res);
       }
       if (req.method === 'PUT') {
-        methodPut(req, res);
+        return methodPut(req, res);
       }
+      if (req.method === 'DELETE') {
+        return methodDelete(req, res);
+      }
+
+      methodNotAllowed405(res);
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(

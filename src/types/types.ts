@@ -12,3 +12,18 @@ export type ExtendedUser = User & {
 export type DBType = {
   users: User[];
 };
+
+export type Endpoint = {
+  path: string;
+  method: string;
+  description: string;
+};
+
+export type Greeting = {
+  message: string;
+  availableEndpoints: Endpoint[];
+};
+
+export type ResultWithUser = {
+  user: User | undefined;
+};

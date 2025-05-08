@@ -4,6 +4,14 @@ import { cleanPath } from '../utils/cleanPath';
 import { dateBase } from '../data/dataBase';
 import gretting from '../data/greeting.json';
 import { uuidValidateV4 } from '../utils/uuidValidate';
+import {
+  badRequest400,
+  greeting200,
+  notFoundResource404,
+  notFoundUser404,
+  user200,
+  users200,
+} from './responses';
 
 export const methodGet = async (req: http.IncomingMessage, res: http.ServerResponse) => {
   const url = req.url ?? '/';
@@ -17,43 +25,34 @@ export const methodGet = async (req: http.IncomingMessage, res: http.ServerRespo
     }
 
     if (cleanUrl === '/api') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(gretting));
+      greeting200(res, gretting);
       return;
     }
 
     if (cleanUrl === '/api/users') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(dateBase.users));
+      users200(res, dateBase);
       return;
     }
 
-    if (cleanUrl === `/api/users/${result?.userId}`) {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(result?.user));
+    if (result && result.user && cleanUrl === `/api/users/${result.userId}`) {
+      user200(res, result);
       return;
     }
 
     if (uuidValidateV4(userId) && cleanUrl.startsWith('/api/users/')) {
-      res.writeHead(404, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Not Found', message: 'User ID not found' }));
+      notFoundUser404(res);
       return;
     }
 
     if (!uuidValidateV4(userId) && cleanUrl.startsWith('/api/users/')) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Bad Request', message: 'Invalid user ID format' }));
+      badRequest400(res);
       return;
     }
 
     if (cleanUrl !== '/api/users') {
-      res.writeHead(404, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Not Found', message: 'Resource does not exist' }));
+      notFoundResource404(res);
       return;
     }
-
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ message: http.STATUS_CODES[404] }));
   } catch (err) {
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.end(

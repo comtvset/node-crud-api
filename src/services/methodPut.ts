@@ -4,6 +4,12 @@ import { dateBase } from '../data/dataBase';
 import { uuidValidateV4 } from '../utils/uuidValidate';
 import { ExtendedUser } from '../types/types';
 import { cleanObject } from '../utils/cleanObject';
+import {
+  badRequest400,
+  notFoundResource404,
+  notFoundUser404,
+  unprocessableEntity422,
+} from './responses';
 
 export const methodPut = async (req: http.IncomingMessage, res: http.ServerResponse) => {
   const url = req.url ?? '/';
@@ -15,8 +21,7 @@ export const methodPut = async (req: http.IncomingMessage, res: http.ServerRespo
   let body = '';
 
   if (!uuidValidateV4(userId) && cleanUrl.startsWith('/api/users/')) {
-    res.writeHead(400, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Bad Request', message: 'Invalid user ID format' }));
+    badRequest400(res);
     return;
   }
 
@@ -24,23 +29,18 @@ export const methodPut = async (req: http.IncomingMessage, res: http.ServerRespo
     const indexUser = dateBase.users.findIndex((item) => item.id === userId);
 
     if (indexUser === -1) {
-      res.writeHead(404, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Not Found', message: 'User ID not found' }));
+      notFoundUser404(res);
       return;
     }
   }
 
-  console.log(cleanUrl);
-
   if (cleanUrl === `/api/users`) {
-    res.writeHead(422, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Unprocessable Entity', message: 'ID is required' }));
+    unprocessableEntity422(res);
     return;
   }
 
   if (cleanUrl !== `/api/users/${userId}`) {
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Not Found', message: 'Resource does not exist' }));
+    notFoundResource404(res);
     return;
   }
 

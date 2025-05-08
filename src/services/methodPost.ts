@@ -3,6 +3,7 @@ import { cleanPath } from '../utils/cleanPath';
 import { dateBase } from '../data/dataBase';
 import { v4 as uuidv4 } from 'uuid';
 import { cleanObject } from '../utils/cleanObject';
+import { notFoundResource404 } from './responses';
 
 export const methodPost = async (req: http.IncomingMessage, res: http.ServerResponse) => {
   const url = req.url ?? '/';
@@ -77,7 +78,6 @@ export const methodPost = async (req: http.IncomingMessage, res: http.ServerResp
       }
     });
   } else {
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Not Found', message: 'Resource does not exist' }));
+    notFoundResource404(res);
   }
 };
