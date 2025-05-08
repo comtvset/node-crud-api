@@ -5,6 +5,10 @@ export type User = {
   hobbies: string[];
 };
 
+export type ExtendedUser = User & {
+  [key: string]: string | number | string[] | undefined;
+};
+
 export type DBType = {
   users: User[];
 };
