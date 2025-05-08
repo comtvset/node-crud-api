@@ -4,7 +4,8 @@
   "description": "simple CRUD API using in-memory database underneath",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "ts-node-dev src/index.ts",
+    "start:dev": "ts-node-dev src/index.ts",
+    "start:prod": "webpack && node dist",
     "build": "webpack --config webpack.config.ts",
     "start": "node dist/bundle.js",
     "lint": "eslint . --config eslint.config.mjs"
