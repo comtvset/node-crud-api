@@ -7,6 +7,6 @@ import { DBType } from '../types/types';
 //   users: userExample,
 // };
 
-export const dateBase: DBType = {
+export const dataBase: DBType = {
   users: [],
 };

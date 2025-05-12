@@ -1,8 +1,8 @@
 import http from 'node:http';
 import { cleanPath } from '../utils/cleanPath';
-import { dateBase } from '../data/dataBase';
+import { dataBase } from '../data/dataBase';
 import { uuidValidateV4 } from '../utils/uuidValidate';
-import { ExtendedUser } from '../types/types';
+import { ExtendedUser, IPCMessage } from '../types/types';
 import { cleanObject } from '../utils/cleanObject';
 import {
   badRequest400,
@@ -10,27 +10,30 @@ import {
   notFoundUser404,
   unprocessableEntity422,
 } from './responses';
+import { loadBalancerArg } from '../server/server';
 
 export const methodPut = async (req: http.IncomingMessage, res: http.ServerResponse) => {
   const url = req.url ?? '/';
   const cleanUrl = cleanPath(url);
 
   const userId = cleanUrl.split('/api/users/')[1];
-  const indexUser = dateBase.users.findIndex((item) => item.id === userId);
+  const indexUser = dataBase.users.findIndex((item) => item.id === userId);
 
   let body = '';
 
-  if (!uuidValidateV4(userId) && cleanUrl.startsWith('/api/users/')) {
-    badRequest400(res);
-    return;
-  }
-
-  if (uuidValidateV4(userId) && cleanUrl.startsWith('/api/users/')) {
-    const indexUser = dateBase.users.findIndex((item) => item.id === userId);
-
-    if (indexUser === -1) {
-      notFoundUser404(res);
+  if (!loadBalancerArg) {
+    if (!uuidValidateV4(userId) && cleanUrl.startsWith('/api/users/')) {
+      badRequest400(res);
       return;
+    }
+
+    if (uuidValidateV4(userId) && cleanUrl.startsWith('/api/users/')) {
+      const indexUser = dataBase.users.findIndex((item) => item.id === userId);
+
+      if (indexUser === -1) {
+        notFoundUser404(res);
+        return;
+      }
     }
   }
 
@@ -56,47 +59,76 @@ export const methodPut = async (req: http.IncomingMessage, res: http.ServerRespo
         throw new Error('Cannot modify ID');
       }
 
-      const protectedFields = ['id', 'username', 'age', 'hobbies'];
-      delete parsed.id;
+      if (!loadBalancerArg) {
+        const protectedFields = ['id', 'username', 'age', 'hobbies'];
+        delete parsed.id;
 
-      const originalUser = dateBase.users[indexUser];
-      const updatedUser: ExtendedUser = { ...originalUser };
+        const originalUser = dataBase.users[indexUser];
+        const updatedUser: ExtendedUser = { ...originalUser };
 
-      for (const key of Object.keys(parsed)) {
-        const value = parsed[key];
+        for (const key of Object.keys(parsed)) {
+          const value = parsed[key];
 
-        if (value === '--remove_field' && key === 'username') {
-          throw new Error('Cannot remove name');
-        }
-
-        if (value === '--remove_field' && key === 'age') {
-          throw new Error('Cannot remove age');
-        }
-
-        if (value === '--remove_field' && key === 'hobbies') {
-          throw new Error('Cannot remove hobbies');
-        }
-
-        if (key === 'hobbies') {
-          if (!Array.isArray(value)) {
-            throw new Error('Hobbies must be an array');
+          if (value === '--remove_field' && key === 'username') {
+            throw new Error('Cannot remove name');
           }
-          updatedUser[key] = Array.isArray(value) ? value : [value];
-        } else if (value === '--remove_field') {
-          if (!protectedFields.includes(key)) {
-            delete updatedUser[key];
+
+          if (value === '--remove_field' && key === 'age') {
+            throw new Error('Cannot remove age');
           }
-        } else {
-          updatedUser[key] = value;
+
+          if (value === '--remove_field' && key === 'hobbies') {
+            throw new Error('Cannot remove hobbies');
+          }
+
+          if (key === 'hobbies') {
+            if (!Array.isArray(value)) {
+              throw new Error('Hobbies must be an array');
+            }
+            updatedUser[key] = Array.isArray(value) ? value : [value];
+          } else if (value === '--remove_field') {
+            if (!protectedFields.includes(key)) {
+              delete updatedUser[key];
+            }
+          } else {
+            updatedUser[key] = value;
+          }
         }
+
+        updatedUser.id = originalUser.id;
+
+        dataBase.users[indexUser] = cleanObject(updatedUser);
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(cleanObject(updatedUser)));
+      } else {
+        if (!process.send) {
+          throw new Error('IPC not available');
+        }
+
+        process.send({ type: 'updateUser', userId, data: parsed });
+
+        process.once('message', (msg: IPCMessage) => {
+          if (msg.type === 'updateUserResponse') {
+            if (!msg.success) {
+              if (msg.error === 'User not found') {
+                notFoundUser404(res);
+              } else {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(
+                  JSON.stringify({
+                    error: 'Bad Request',
+                    message: msg.error,
+                  }),
+                );
+              }
+            } else {
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify(msg.updatedUser));
+            }
+          }
+        });
       }
-
-      updatedUser.id = originalUser.id;
-
-      dateBase.users[indexUser] = cleanObject(updatedUser);
-
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(cleanObject(updatedUser)));
     } catch (err) {
       res.writeHead(400, { 'Content-Type': 'application/json' });
       res.end(

@@ -39,6 +39,6 @@ export default [
     files: ['**/*.ts', '**/*.tsx'],
   },
   {
-    ignores: ['**/*.js', 'node_modules/**', 'dist/**'],
+    ignores: ['**/*.js', 'node_modules/**', 'dist/**', '**/*.test.ts'],
   },
 ];
