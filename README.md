@@ -25,9 +25,9 @@ Simple CRUD API using in-memory database underneath.
 
 _note: To remove a specific field from a user object, pass **"--remove_field"** as the value of that field in a PUT request._
 
-For example, to remove the email field: `curl --request PUT 'localhost:{port}/api/users/<id>' --data '{"email":"--remove_field"}'`  
-Example with real ID: `curl --request PUT 'localhost:4000/api/users/36754148-3c2d-4f1e-a95f-b1d5f12dd0f9' --data '{"email":"--remove_field"}'`
-
+- PUT `curl --request PUT 'localhost:{port}/api/users/<id>' --data '{"email":"--remove_field"}'`  
+  
+for example: `curl --request PUT 'localhost:4000/api/users/36754148-3c2d-4f1e-a95f-b1d5f12dd0f9' --data '{"email":"--remove_field"}'`
 
 
 ## Technical requirements
